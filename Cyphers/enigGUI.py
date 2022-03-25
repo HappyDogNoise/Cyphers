@@ -5,7 +5,7 @@ from Cyphers import Enigma
 class enigmaGUI:
     """Tkinter class for the GUI"""
 
-    def __init__(self, master):
+    def __init__(self, master: object):
         """iniitializes the class with back ground and sets up all atributes"""
 
         self.background = "#ac7339"
@@ -43,12 +43,32 @@ class enigmaGUI:
             for f in range(3):
                  
                  self.FramePack[(3*i)+f].grid(column = f, row = i)
+
+        #dictionary of the enigma rotors and their names taken from https://en.wikipedia.org/wiki/Enigma_rotor_details
+        self.rotorDictionary = {'I': "JGDQOXUSCAMIFRVTPNEWKBLZYH","II": "NTZPSFBOKMWRCJDIVLAEYUXHGQ","III": "JVIUBHTCDYAKEQZPOSGXNRMWFL",
+            'UKW': 'QYHOGNECVPUZTFDJAXWMKISRBL', 'ETW': 'QWERTZUIOASDFGHJKPYXCVBNML', 'β': 'LEYJVCNIXWPBQMDRTAKZGFUHOS', 'Γ': 'FSOKANUERHMBTIYCWLQPZXVGJD'
+        }
         
         #initiallizes the list for the keyboard
         self.keyboard = []
         
         #runs the keyboard initialization
-        self.setKeyboard()           
+        self.setKeyboard()    
+
+        self.vList = ['I','II','III','UKW','ETW','β','Γ']    
+
+#         self.ButtonReg = []
+#         self.stringVarRegi = []
+#         self.rotorReg = []
+#         for i in range(3):
+#             self.ButtonReg.append(Button(self.FramePack[2-i], text = self.getRotLet(i), command=lambda:self.pushOne(i), height = 3, width = 5,bg = self.background))
+#             self.ButtonReg[i].grid(row = 0, column = 2 - i)
+# 
+#             self.stringVarRegi.append(StringVar())
+#             self.stringVarRegi[i].set(self.vList[i])
+# 
+#             self.rotorReg.append(OptionMenu(self.FramePack[2 - i], self.stringVarRegi[i], *self.vList,command=lambda a:self.selectPair(i,a)))
+#             self.rotorReg[i].grid(row = 1, column = 2 - i)
 
         #sets the buttons for the rotation
         self.ButtonReg = [Button(self.FramePack[2], text = self.getRotLet(0), command=lambda:self.pushOne(0), height = 3, width = 5,bg = self.background),
@@ -57,6 +77,19 @@ class enigmaGUI:
         self.ButtonReg[0].grid(row=0,column=2)
         self.ButtonReg[1].grid(row=0,column=1)
         self.ButtonReg[2].grid(row=0,column=0)
+
+        self.stringVarRegi = [StringVar(),StringVar(),StringVar()]
+        self.stringVarRegi[0].set(self.vList[0])
+        self.stringVarRegi[1].set(self.vList[1])
+        self.stringVarRegi[2].set(self.vList[2])
+        #creates list for the changing of the rotors
+        self.rotorReg = [OptionMenu(self.FramePack[2], self.stringVarRegi[0], *self.vList,command=lambda a:self.selectPair(0,a)),
+                        OptionMenu(self.FramePack[1], self.stringVarRegi[1], *self.vList,command=lambda a:self.selectPair(1,a)),
+                        OptionMenu(self.FramePack[0], self.stringVarRegi[2], *self.vList,command=lambda a:self.selectPair(2,a))]
+        self.rotorReg[0].grid(row=1,column=2)
+        self.rotorReg[1].grid(row=1,column=1)
+        self.rotorReg[2].grid(row=1,column=0)
+
         
         master.mainloop()
     
@@ -65,8 +98,17 @@ class enigmaGUI:
         self.machine.pushRotor()
         for i in range(3):
             self.ButtonReg[i].config(text = self.getRotLet(i))
-        
-    
+
+    def changeRotor(self,i,pair):
+        """changes the given rotor to the given pair"""
+        self.machine.changePair(i,pair)
+
+    def selectPair(self,i,selected):
+        """lets the user select a new pair for the rotor""" 
+        self.changeRotor(i, self.rotorDictionary[selected])
+        for i in range(3):
+            self.ButtonReg[i].config(text = self.getRotLet(i))
+           
     def onKeyPress(self,event):
         """when a key is pressed the encryption is started"""
         letter = self.machine.getLetter(ord(event.char.upper()) - 65)
