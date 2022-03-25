@@ -3,7 +3,7 @@ from Cyphers import Enigma
 
 
 class enigmaGUI:
-    """Thonny class for the GUI"""
+    """Tkinter class for the GUI"""
 
     def __init__(self, master):
         """iniitializes the class with back ground and sets up all atributes"""
