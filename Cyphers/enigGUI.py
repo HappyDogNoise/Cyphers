@@ -1,3 +1,4 @@
+
 from tkinter import *
 from Cyphers import Enigma
 
@@ -29,16 +30,21 @@ class enigmaGUI:
         #creates an encapsulated enigma class
         self.machine = Enigma()
         
+        
         #creates a list of all the frames
-        self.FramePack = [Frame(master, width = 640, height = 540,bg = self.background),
-                          Frame(master, width = 640, height = 540,bg = self.background),
-                          Frame(master, width = 640, height = 540,bg = self.background),
-                          Frame(master, width = 640, height = 540,bg = self.background),
-                          Frame(master, width = 640, height = 540,bg = self.background),
-                          Frame(master, width = 640, height = 540,bg = self.background)]
+        self.FramePack = [Frame(master, bg = self.background),
+                          Frame(master, bg = self.background),
+                          Frame(master, bg = self.background),
+                          Frame(master, bg = self.background),
+                          Frame(master, bg = self.background),
+                          Frame(master, bg = self.background),
+                          Frame(master, bg = self.background),
+                          Frame(master, bg = self.background),
+                          Frame(master, bg = self.background),
+                          ]
         
         #places each frame in the correct position of a grid
-        for i in range(2):
+        for i in range(3):
             
             for f in range(3):
                  
@@ -57,18 +63,18 @@ class enigmaGUI:
 
         self.vList = ['I','II','III','UKW','ETW','β','Γ']    
 
-#         self.ButtonReg = []
-#         self.stringVarRegi = []
-#         self.rotorReg = []
-#         for i in range(3):
-#             self.ButtonReg.append(Button(self.FramePack[2-i], text = self.getRotLet(i), command=lambda:self.pushOne(i), height = 3, width = 5,bg = self.background))
-#             self.ButtonReg[i].grid(row = 0, column = 2 - i)
-# 
-#             self.stringVarRegi.append(StringVar())
-#             self.stringVarRegi[i].set(self.vList[i])
-# 
-#             self.rotorReg.append(OptionMenu(self.FramePack[2 - i], self.stringVarRegi[i], *self.vList,command=lambda a:self.selectPair(i,a)))
-#             self.rotorReg[i].grid(row = 1, column = 2 - i)
+        # self.ButtonReg = []
+        # self.stringVarRegi = []
+        # self.rotorReg = []
+        # for i in range(3):
+        #     self.ButtonReg.append(Button(self.FramePack[2-i], text = self.getRotLet(i), command=lambda:self.pushOne(i), height = 3, width = 5,bg = self.background))
+        #     self.ButtonReg[i].grid(row = 0, column = 2 - i)
+
+        #     self.stringVarRegi.append(StringVar())
+        #     self.stringVarRegi[i].set(self.vList[i])
+
+        #     self.rotorReg.append(OptionMenu(self.FramePack[2 - i], self.stringVarRegi[i], *self.vList,command=lambda a:self.selectPair(i,a)))
+        #     self.rotorReg[i].grid(row = 1, column = 2 - i)
 
         #sets the buttons for the rotation
         self.ButtonReg = [Button(self.FramePack[2], text = self.getRotLet(0), command=lambda:self.pushOne(0), height = 3, width = 5,bg = self.background),
@@ -90,14 +96,38 @@ class enigmaGUI:
         self.rotorReg[1].grid(row=1,column=1)
         self.rotorReg[2].grid(row=1,column=0)
 
+        #sets the sizes of the rows and columns
+        self.master.grid_rowconfigure(0, minsize=250, weight=1)
+        self.master.grid_rowconfigure(1, minsize=250, weight=1)
+        self.master.grid_rowconfigure(2, minsize=250, weight=1)
+        self.master.grid_columnconfigure(0, minsize=450, weight=1)
+        self.master.grid_columnconfigure(1, minsize=450, weight=1)
+        self.master.grid_columnconfigure(2, minsize=450, weight=1)
+
+        #shows the typed message
+        self.messageLabel = Label(self.FramePack[7], bg=self.background)
+        self.messageLabel.grid(row=0,column=0)
+        self.message = []
+        self.clrMessage = Button(self.FramePack[6],bg = self.background,text="clear message",command=self.clearMessage)
+        self.clrMessage.grid(row=0,column=0)
         
         master.mainloop()
-    
+
+    def clearMessage(self):
+        """clears the message screen"""
+        self.message = []
+        self.messageLabel.config(text=self.message)
+
     def pushEm(self):
         """Cycles the primary rotor"""
         self.machine.pushRotor()
         for i in range(3):
             self.ButtonReg[i].config(text = self.getRotLet(i))
+
+    def setupPlugBoard(self):
+        """creates the plugboard like the keyboard on the start up"""
+        
+
 
     def changeRotor(self,i,pair):
         """changes the given rotor to the given pair"""
@@ -115,6 +145,8 @@ class enigmaGUI:
         self.keyboard[letter].config(bg = 'yellow')
         for i in range(3):
             self.ButtonReg[i].config(text = self.getRotLet(i))
+        self.message.append(chr(letter + 65))
+        self.messageLabel.config(text=self.message)
 
     
     def onRelease(self,event):
@@ -134,8 +166,7 @@ class enigmaGUI:
         """gets the letter from a rotor"""
         return chr(self.machine.showLetter(i) + 65)
         
-
-    
+   
     def setKeyboard(self):
         """sets up the Lightboard"""
 
@@ -147,10 +178,10 @@ class enigmaGUI:
             for f in range(10 - (i ** 2)):
                 
                 #creates the letters
-                self.keyboard.append(Label(self.FramePack[4], text = self.letters[count],bg = self.background))
+                self.keyboard.append(Label(self.FramePack[4], text = self.letters[count],bg = self.background, font = ("Ariel",16), padx=10,pady=5))
                 self.keyboard[count].grid(row = i, column = f+i)
                 count += 1
-        self.keyboard.append(Label(self.FramePack[4],text = "Z",bg = self.background))
+        self.keyboard.append(Label(self.FramePack[4],text = "Z",bg = self.background, font = ("Ariel",16), padx=10,pady=5))
         self.keyboard[25].grid(row = 2, column = 8)
 
 
