@@ -255,6 +255,15 @@ class Enigma:
         #attribute for the reflector, similar to the pairs in the rotors
         self.Reflector = Reflector
 
+        #plugboard set up
+        self.plugBoard = []
+        self.setupPlugBoard()
+
+    def setupPlugBoard(self):
+        """function to be run initially to set the plug board to nothing"""
+        for i in range(26):
+            self.plugBoard.append([i,i])
+
     def rotorPair(self, shuffled):
         """changes a string of rotor pairs (off the wiki) to the needed 2D array"""
 
@@ -277,6 +286,11 @@ class Enigma:
         if self.rotors[i].frontPointer == 0 and i != 2:
             
             self.pushRotor(i+1)
+
+    def changePlug(self,From,To):
+        """changes the plugboard's conections"""
+        self.plugBoard[From][1] = To
+        self.plugBoard[To][1] = From
         
 
     def pushSpecific(self, sRotor):
@@ -303,6 +317,8 @@ class Enigma:
         """gets the encoded letter
         takes in the original input letter as an integer"""
 
+        inputLetter = self.plugBoard[inputLetter][1]
+
         #loops over each rotor
         for i in self.rotors:
             
@@ -319,5 +335,11 @@ class Enigma:
         
         self.pushRotor(0)
 
+        inputLetter = self.plugBoard[inputLetter][1]
+
         #returns as a letter
         return(inputLetter)
+
+    def changePair(self,i,pair):
+        """changes the pair of one of the 3 rotors"""
+        self.rotors[i].changePairing(pair)
