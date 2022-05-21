@@ -1,4 +1,4 @@
-# Cypers
+# Cyphers
 a few cyphers I decided to make in python.
 
 Includes Enigma GUI in Tkinter and vernam and Caesar cyphers
