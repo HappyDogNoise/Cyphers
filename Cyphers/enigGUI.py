@@ -55,6 +55,23 @@ class enigmaGUI:
             'UKW': 'QYHOGNECVPUZTFDJAXWMKISRBL', 'ETW': 'QWERTZUIOASDFGHJKPYXCVBNML', 'β': 'LEYJVCNIXWPBQMDRTAKZGFUHOS', 'Γ': 'FSOKANUERHMBTIYCWLQPZXVGJD'
         }
         
+        self.mainPaige()
+        
+        master.mainloop()
+
+    def clearMessage(self):
+        """clears the message screen"""
+        self.message = []
+        self.messageLabel.config(text=self.message)
+
+    def mainPaige(self):
+        """creates the main paige"""
+
+        #clears the screen
+        for i in self.FramePack:
+            for widget in i.winfo_children():
+                widget.destroy()
+
         #initiallizes the list for the keyboard
         self.keyboard = []
         
@@ -109,24 +126,81 @@ class enigmaGUI:
         self.messageLabel.grid(row=0,column=0)
         self.message = []
         self.clrMessage = Button(self.FramePack[6],bg = self.background,text="clear message",command=self.clearMessage)
-        self.clrMessage.grid(row=0,column=0)
+        self.clrMessage.grid(row=0,column=0)#initiallizes the list for the keyboard
+        self.keyboard = []
         
-        master.mainloop()
+        #runs the keyboard initialization
+        self.setKeyboard()    
 
-    def clearMessage(self):
-        """clears the message screen"""
+        self.vList = ['I','II','III','UKW','ETW','β','Γ']    
+
+        # self.ButtonReg = []
+        # self.stringVarRegi = []
+        # self.rotorReg = []
+        # for i in range(3):
+        #     self.ButtonReg.append(Button(self.FramePack[2-i], text = self.getRotLet(i), command=lambda:self.pushOne(i), height = 3, width = 5,bg = self.background))
+        #     self.ButtonReg[i].grid(row = 0, column = 2 - i)
+
+        #     self.stringVarRegi.append(StringVar())
+        #     self.stringVarRegi[i].set(self.vList[i])
+
+        #     self.rotorReg.append(OptionMenu(self.FramePack[2 - i], self.stringVarRegi[i], *self.vList,command=lambda a:self.selectPair(i,a)))
+        #     self.rotorReg[i].grid(row = 1, column = 2 - i)
+
+        #sets the buttons for the rotation
+        self.ButtonReg = [Button(self.FramePack[2], text = self.getRotLet(0), command=lambda:self.pushOne(0), height = 3, width = 5,bg = self.background),
+                          Button(self.FramePack[1], text = self.getRotLet(1), command=lambda:self.pushOne(1), height = 3, width = 5,bg = self.background),
+                          Button(self.FramePack[0], text = self.getRotLet(2), command=lambda:self.pushOne(2), height = 3, width = 5,bg = self.background)]
+        self.ButtonReg[0].grid(row=0,column=2)
+        self.ButtonReg[1].grid(row=0,column=1)
+        self.ButtonReg[2].grid(row=0,column=0)
+
+        self.stringVarRegi = [StringVar(),StringVar(),StringVar()]
+        self.stringVarRegi[0].set(self.vList[0])
+        self.stringVarRegi[1].set(self.vList[1])
+        self.stringVarRegi[2].set(self.vList[2])
+        #creates list for the changing of the rotors
+        self.rotorReg = [OptionMenu(self.FramePack[2], self.stringVarRegi[0], *self.vList,command=lambda a:self.selectPair(0,a)),
+                        OptionMenu(self.FramePack[1], self.stringVarRegi[1], *self.vList,command=lambda a:self.selectPair(1,a)),
+                        OptionMenu(self.FramePack[0], self.stringVarRegi[2], *self.vList,command=lambda a:self.selectPair(2,a))]
+        self.rotorReg[0].grid(row=1,column=2)
+        self.rotorReg[1].grid(row=1,column=1)
+        self.rotorReg[2].grid(row=1,column=0)
+
+        #sets the sizes of the rows and columns
+        self.master.grid_rowconfigure(0, minsize=250, weight=1)
+        self.master.grid_rowconfigure(1, minsize=250, weight=1)
+        self.master.grid_rowconfigure(2, minsize=250, weight=1)
+        self.master.grid_columnconfigure(0, minsize=450, weight=1)
+        self.master.grid_columnconfigure(1, minsize=450, weight=1)
+        self.master.grid_columnconfigure(2, minsize=450, weight=1)
+
+        #shows the typed message
+        self.messageLabel = Label(self.FramePack[7], bg=self.background)
+        self.messageLabel.grid(row=0,column=0)
         self.message = []
-        self.messageLabel.config(text=self.message)
+        self.clrMessage = Button(self.FramePack[6],bg = self.background,text="clear message",command=self.clearMessage)
+        self.clrMessage.grid(row=0,column=0)
+
+        #shows the plugboard
+        self.plugboard = Button(self.FramePack[8],bg=self.background,text="plugboard",command=self.setupPlugBoard)
+        self.plugboard.grid(row=0,column=0)
 
     def pushEm(self):
         """Cycles the primary rotor"""
         self.machine.pushRotor()
         for i in range(3):
             self.ButtonReg[i].config(text = self.getRotLet(i))
+        
 
     def setupPlugBoard(self):
         """creates the plugboard like the keyboard on the start up"""
-        
+        for i in self.FramePack:
+            for widget in i.winfo_children():
+                widget.destroy()
+
+        button = Button(self.FramePack[0],command=self.mainPaige)
+        button.grid(row=0,column=0)
 
 
     def changeRotor(self,i,pair):
@@ -141,12 +215,24 @@ class enigmaGUI:
            
     def onKeyPress(self,event):
         """when a key is pressed the encryption is started"""
-        letter = self.machine.getLetter(ord(event.char.upper()) - 65)
-        self.keyboard[letter].config(bg = 'yellow')
-        for i in range(3):
-            self.ButtonReg[i].config(text = self.getRotLet(i))
-        self.message.append(chr(letter + 65))
-        self.messageLabel.config(text=self.message)
+        #checks if space is pressed
+        if event.char == " ":
+            self.message.append("/")
+            self.messageLabel.config(text = self.message)
+
+        #checks if any key that isnt a letter is typed
+        elif ord(event.char.upper()) - 65 < 0 or ord(event.char.upper()) - 65 > 25:
+            self.message.append(event.char)
+            self.messageLabel.config(text=self.message)
+
+        #gets the letter and shows it on the message
+        else:
+            letter = self.machine.getLetter(ord(event.char.upper()) - 65)
+            self.keyboard[letter].config(bg = 'yellow')
+            for i in range(3):
+                self.ButtonReg[i].config(text = self.getRotLet(i))
+            self.message.append(chr(letter + 65))
+            self.messageLabel.config(text=self.message)
 
     
     def onRelease(self,event):
