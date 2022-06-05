@@ -51,7 +51,7 @@ class enigmaGUI:
                  self.FramePack[(3*i)+f].grid(column = f, row = i)
 
         #dictionary of the enigma rotors and their names taken from https://en.wikipedia.org/wiki/Enigma_rotor_details
-        self.rotorDictionary = {'I': "JGDQOXUSCAMIFRVTPNEWKBLZYH","II": "NTZPSFBOKMWRCJDIVLAEYUXHGQ","III": "JVIUBHTCDYAKEQZPOSGXNRMWFL",
+        self.rotorDictionary = {'I': "JGDQOXUSCAMIFRVTPNEWKBLZYH","II": "NTZPSFBOKMWRCJDIVLAEYUXHGQ","III": "JVIUBHTCDYAKEQZPOSGXNRMWFL","IV": "ESOVPZJAYQUIRHXLNFTGKDCMWB","V": "VZBRGITYUPSDNHLXAWMJQOFECK","VI": "JPGVOUMFYQBENHZRDKASXLICTW",
             'UKW': 'QYHOGNECVPUZTFDJAXWMKISRBL', 'ETW': 'QWERTZUIOASDFGHJKPYXCVBNML', 'β': 'LEYJVCNIXWPBQMDRTAKZGFUHOS', 'Γ': 'FSOKANUERHMBTIYCWLQPZXVGJD'
         }
         
@@ -132,7 +132,7 @@ class enigmaGUI:
         #runs the keyboard initialization
         self.setKeyboard()    
 
-        self.vList = ['I','II','III','UKW','ETW','β','Γ']    
+        self.vList = ['I','II','III','IV','V','VI','UKW','ETW','β','Γ']    
 
         # self.ButtonReg = []
         # self.stringVarRegi = []
