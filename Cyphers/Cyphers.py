@@ -39,14 +39,19 @@ def Morse(message = None, Forward = None):
     #Text to morse
     if Forward:
 
+        message = message.replace(".","")
         #empty list for the cypher
         cypher = []
 
         #loop over whole message
         for i in range(len(message)):
+            
+            if ord(message[i]) > 64 and ord(message[i]) < 91:
+                #append the list with the encoded char
+                cypher.append(morseDictionary[ord(message[i]) - 65][1])
 
-            #append the list with the encoded char
-            cypher.append(morseDictionary[ord(message[i]) - 65][1])
+            else:
+                cypher.append(message[i])
 
         #return as a string
         return('/'.join(cypher))
@@ -55,9 +60,6 @@ def Morse(message = None, Forward = None):
     else:
         #the message is split with the /s removed
         message = message.split('/')
-
-        #empty list to store th cypher
-        cypher = []
 
         #for each element of the message
         for j in range(len(message)):
@@ -69,10 +71,10 @@ def Morse(message = None, Forward = None):
                 if morseDictionary[i][1] == message[j]:
                     
                     #append the letter to cypher
-                    cypher.append(morseDictionary[i][0])
+                    message[j] = morseDictionary[i][0]
 
         #return the cypher joined togeather
-        return(''.join(cypher))
+        return(''.join(message))
 
 def Caesar(message = None,Key = None):
     """translates a message using a caesar cypher
@@ -86,21 +88,27 @@ def Caesar(message = None,Key = None):
     if Key == None:
         Key = input("what letter shall \"a\" be equal to:\n                     ")
         Key = ord(Key.upper()) - 65
-        #print("to translate back use key = " + chr((26 - Key) + 65) + "\n\n")
+    #if key if input as a character it will be set as a number
+    if type(Key) == str:
+        Key = ord(Key.upper()) - 65
 
     #creates an empty list to store each character
     cypher = []
 
     #loops over each part of the message
     for i in message:
-        numbered = ord(i) + Key
-        if numbered > 90:
-            numbered -= 26
-        cypher.append(chr(numbered))
+        if ord(i) > 90 or ord(i) < 65:
+            cypher.append(i)
+        else:
+            numbered = ord(i) + Key
+            if numbered > 90:
+                numbered -= 26
+            cypher.append(chr(numbered))
     return ''.join(cypher),chr((26 - Key) + 65)
 
-#function for the vernam cypher
 def vernam(message = None, Key = None):
+    """vernam cypher 
+    takes a message and key and will use these to encrypt a message"""
 
     #gets message if none passed in
     if message == None:
@@ -111,7 +119,7 @@ def vernam(message = None, Key = None):
         Key = []
         for i in range(random.randint(3,len(message))):
             Key.append(chr(random.randint(0,128)))
-        print(Key)
+        print("key = " + str(Key))
     while len(Key) < len(message):
         Key += Key
 
@@ -234,7 +242,7 @@ class Rotor:
 class Enigma:
     """object of the whole machine. includes a refector; 3 rotors; plugboard and outputs coded/decoded letter"""
 
-    def __init__(self, Reflector = None, a = None, b = None, c = None):
+    def __init__(self, Reflector = None, a = None, b = None, c = None, plugboard = None):
         """init method creates the needed atributes
         takes in the Reflector that is a sstring or list along with 3 rotor pairs"""
 
@@ -255,13 +263,12 @@ class Enigma:
         self.Reflector = Reflector
 
         #plugboard set up
-        self.plugBoard = []
-        self.setupPlugBoard()
-
-    def setupPlugBoard(self):
-        """function to be run initially to set the plug board to nothing"""
-        for i in range(26):
-            self.plugBoard.append([i,i])
+        if plugboard == None:
+            self.plugBoard = []
+            for i in range(26):
+                self.plugBoard.append([i,i])
+        else:
+            self.plugBoard = plugboard
 
     def rotorPair(self, shuffled):
         """changes a string of rotor pairs (off the wiki) to the needed 2D array"""
@@ -342,7 +349,6 @@ class Enigma:
     def getLetter(self, inputLetter):
         """gets the encoded letter
         takes in the original input letter as an integer"""
-
         inputLetter = self.plugBoard[inputLetter][1]
 
         #loops over each rotor
@@ -370,6 +376,50 @@ class Enigma:
         """changes the pair of one of the 3 rotors"""
         self.rotors[i].changePairing(pair)
 
+def useEnigma(message = None, rotors = None, reflector = None, plugboard = None):
+    """no gui version of enigma used to quickly get a whole translated message"""
+    if rotors == None:
+        rotors = [None,None,None]
+
+    #get whole message
+    if message == None:
+        message = input("input messsage:\n          ")
+    message = message.upper()
+
+    cypher = []
+    enig = Enigma(reflector,rotors[0],rotors[1],rotors[2],plugboard)
+    for i in range(len(message)):
+        if ord(message[i]) > 64 and ord(message[i]) < 91:
+            cypher.append(chr(enig.getLetter(ord(message[i]) - 65) + 65))
+        else:
+            cypher.append(message[i])
+
+    cypher = "".join(cypher)
+    return cypher
+
 def hash():
     """hash function thing testing"""
 
+def fileWork(message,cypher,key = None):
+    """allows for the functions to use files
+    cypher will have to be a labda of the funtion"""
+
+    f = open(message,"r")
+
+    listy = []
+    for i in f:
+        listy.append(i)
+        listy[len(listy)-1] = listy[len(listy)-1].strip("\n")
+    f.close()
+    listy = " ".join(listy)
+    return(cypher(listy,key))
+    
+if __name__ == "__main__":
+    f = open("MessageTest.txt","w")
+    f.write("""Hello
+This is Finlay Holmes. 
+Trying to test out using my cyphers on a text document.
+""")
+    f.close()
+    print(Morse(fileWork("MessageTest.txt",lambda x ,y:useEnigma(x))))
+    pass
