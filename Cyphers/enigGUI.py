@@ -1,18 +1,25 @@
 
 from tkinter import *
 from Cyphers import Enigma
+import os
 
 
 class enigmaGUI:
     """Tkinter class for the GUI"""
 
-    def __init__(self, master: object):
+    def __init__(self, master: Enigma):
         """iniitializes the class with back ground and sets up all atributes"""
 
         self.background = "#ac7339"
 
+        self.listOfPairs = []
+
         #gets the window
         self.master = master
+
+        #gets the light images
+        """ self.lightOff = PhotoImage(file=('./Assets/Images/bulb.png'))
+        self.lightOn = PhotoImage(file='./Assets/Images/bulbL.png') """
 
         #gives the window a title
         master.title("Enigma")
@@ -192,17 +199,52 @@ class enigmaGUI:
         for i in range(3):
             self.ButtonReg[i].config(text = self.getRotLet(i))
         
-
     def setupPlugBoard(self):
         """creates the plugboard like the keyboard on the start up"""
         for i in self.FramePack:
             for widget in i.winfo_children():
                 widget.destroy()
 
-        button = Button(self.FramePack[0],command=self.mainPaige)
+        #button to return to the main paige of the enigma
+        button = Button(self.FramePack[0], text = "return",command=self.mainPaige)
         button.grid(row=0,column=0)
 
+        #button to create new pair
+        newPair = Button(self.FramePack[0], text = "new ", command = self.NewPair)
+        newPair.grid(row=1,column=0)
 
+        #shows all the pairs
+        self.pairsList = Label(self.FramePack[1], text = self.listOfPairs)
+        self.pairsList.grid(row=0,column=0)
+
+        #creates the 2 option menus that create the new pairs
+        self.alphabet1 = StringVar(self.master)
+        self.alphabet1.set("new pair 1")
+        self.alphabet2 = StringVar(self.master)
+        self.alphabet2.set("new pair 2")
+        pair1 = OptionMenu(self.FramePack[3],self.alphabet1,*self.letters)
+        pair2 = OptionMenu(self.FramePack[5],self.alphabet2,*self.letters)
+        pair1.grid(row=0,column=0)
+        pair2.grid(row=0,column=0)
+
+    def NewPair(self):
+        """creates a new pair of numbers in the plugboard"""
+
+        #stops users accidentally creating a pair with the initial conditions of the menus
+        if self.alphabet1.get() != "new pair 1" and self.alphabet2 != "new pair 2":
+
+            #adds a new plug by hetting what was in the menus
+            self.machine.changePlug(ord(self.alphabet1.get()) - 65,ord(self.alphabet2.get()) - 65)
+            self.listOfPairs=self.machine.showPlugPairs()
+
+            #changes the pairs into letters
+            for i in range(len(self.listOfPairs)):
+                self.listOfPairs[i][0] = chr(int(self.listOfPairs[i][0] + 65))
+                self.listOfPairs[i][1] = chr(int(self.listOfPairs[i][1] + 65))
+
+            #shows on the window
+            self.pairsList.config(text = self.listOfPairs)
+   
     def changeRotor(self,i,pair):
         """changes the given rotor to the given pair"""
         self.machine.changePair(i,pair)
@@ -233,26 +275,22 @@ class enigmaGUI:
                 self.ButtonReg[i].config(text = self.getRotLet(i))
             self.message.append(chr(letter + 65))
             self.messageLabel.config(text=self.message)
-
-    
+  
     def onRelease(self,event):
         """catches the released key to simulate a light turning on when the key is held"""
         for i in self.keyboard:
             i.config(bg = self.background)
 
-    
     def pushOne(self,i):
         """pushes the rotor and shows it on the screen"""
         self.machine.pushSpecific(i)
         for i in range(3):
             self.ButtonReg[i].config(text = self.getRotLet(i))
-
-    
+ 
     def getRotLet(self,i):
         """gets the letter from a rotor"""
         return chr(self.machine.showLetter(i) + 65)
-        
-   
+          
     def setKeyboard(self):
         """sets up the Lightboard"""
 
