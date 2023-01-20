@@ -1,4 +1,5 @@
 import random
+from copy import deepcopy
 
 def Morse(message = None, Forward = None):
     """function takes in either morse message or text message and translates it either way"""
@@ -72,7 +73,6 @@ def Morse(message = None, Forward = None):
 
         #return the cypher joined togeather
         return(''.join(cypher))
-
 
 def Caesar(message = None,Key = None):
     """translates a message using a caesar cypher
@@ -231,7 +231,6 @@ class Rotor:
         #sets the atribute to the new pairing
         self.pairs = pairing
 
-
 class Enigma:
     """object of the whole machine. includes a refector; 3 rotors; plugboard and outputs coded/decoded letter"""
 
@@ -287,12 +286,40 @@ class Enigma:
             
             self.pushRotor(i+1)
 
+    def showPlugPairs(self):
+        """shows all the plug board pairs in the machine"""
+
+        #creates a copy so that it may be referenced by value and not reference
+        plugBoard = deepcopy(self.plugBoard)
+        pairs = []
+
+        for i in range(len(plugBoard)):
+            
+            #will only show ones that are different
+            if plugBoard[i][0] != plugBoard[i][1]:
+                pairs.append(plugBoard[i])
+        
+        return pairs
+
     def changePlug(self,From,To):
         """changes the plugboard's conections"""
+
+        #checks if both values are the same
+        if From == To:
+            #sets both values back to the same value
+            self.plugBoard[self.plugBoard[From][1]][1] = self.plugBoard[From][1]
+            self.plugBoard[From][1] = To
+
+        #checks if you're changing a value that was already changed
+        if self.plugBoard[From][1] != self.plugBoard[To][0]:
+            #sets the other one back to default
+            self.plugBoard[self.plugBoard[From][1]][1] = self.plugBoard[From][1]
+        
+        #sets the new plugs
         self.plugBoard[From][1] = To
         self.plugBoard[To][1] = From
-        
 
+        
     def pushSpecific(self, sRotor):
         """increases selected rotor by one"""
 
@@ -311,7 +338,6 @@ class Enigma:
     def showLetter(self, rot):
         """shows one rotors position"""
         return self.rotors[rot].getPoint()
-
 
     def getLetter(self, inputLetter):
         """gets the encoded letter
@@ -343,3 +369,7 @@ class Enigma:
     def changePair(self,i,pair):
         """changes the pair of one of the 3 rotors"""
         self.rotors[i].changePairing(pair)
+
+def hash():
+    """hash function thing testing"""
+
