@@ -1,5 +1,6 @@
 import random
 from copy import deepcopy
+from os import chdir, getcwd
 
 def Morse(message = None, Forward = None):
     """function takes in either morse message or text message and translates it either way"""
@@ -244,7 +245,7 @@ class Enigma:
 
     def __init__(self, Reflector = None, a = None, b = None, c = None, plugboard = None):
         """init method creates the needed atributes
-        takes in the Reflector that is a sstring or list along with 3 rotor pairs"""
+        takes in the Reflector that is a string or list along with 3 rotor pairs"""
 
         #if the parameters supplied show None then it will be given a default one
         if a == None:
@@ -311,16 +312,9 @@ class Enigma:
     def changePlug(self,From,To):
         """changes the plugboard's conections"""
 
-        #checks if both values are the same
-        if From == To:
-            #sets both values back to the same value
-            self.plugBoard[self.plugBoard[From][1]][1] = self.plugBoard[From][1]
-            self.plugBoard[From][1] = To
-
-        #checks if you're changing a value that was already changed
-        if self.plugBoard[From][1] != self.plugBoard[To][0]:
-            #sets the other one back to default
-            self.plugBoard[self.plugBoard[From][1]][1] = self.plugBoard[From][1]
+        #sets all plugs connected to the orig pai back to original
+        self.plugBoard[self.plugBoard[From][1]][0],self.plugBoard[self.plugBoard[From][1]][1] = self.plugBoard[From][1],self.plugBoard[From][1]
+        self.plugBoard[self.plugBoard[To][1]][0],self.plugBoard[self.plugBoard[To][1]][1] = self.plugBoard[To][1],self.plugBoard[To][1]
         
         #sets the new plugs
         self.plugBoard[From][1] = To
@@ -413,13 +407,19 @@ def fileWork(message,cypher,key = None):
     f.close()
     listy = " ".join(listy)
     return(cypher(listy,key))
-    
+
+
 if __name__ == "__main__":
+    try:
+        chdir("/Cyphers")
+        print(getcwd())
+    except:
+        pass
+    print(getcwd())
     f = open("MessageTest.txt","w")
-    f.write("""Hello
-This is Finlay Holmes. 
-Trying to test out using my cyphers on a text document.
+    f.write(""".--./.--/-.-./..-/.-/.--./ /.--/.--./ /-.../---/-.../..-/.--
 """)
     f.close()
-    print(Morse(fileWork("MessageTest.txt",lambda x ,y:useEnigma(x))))
-    pass
+    f = open("MessageTest.txt","a")
+    f.write(Morse(fileWork("MessageTest.txt",lambda x ,y:useEnigma(x))))
+    f.close()
