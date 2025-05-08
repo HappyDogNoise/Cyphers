@@ -2,6 +2,24 @@
 from tkinter import *
 from Cyphers import Enigma
 
+class Plugs:
+
+    def __init__(self, xPos, yPos, letter):
+        """creates the plug classes and assignes their limits"""
+
+        #size of the plugs with [x, y]
+        self.plugSize = [10, 5]
+
+        #top left position of each plug
+        self.Positions = [xPos, yPos]
+
+        #bottom right pos
+        self.limits = [self.Positions[0] + self.plugSize[0], self.Positions[1] + self.plugSize[1]]
+
+        self.letter = letter
+
+
+
 class enigmaGUI:
     """Tkinter class for the GUI"""
 
@@ -11,14 +29,18 @@ class enigmaGUI:
         #the background colour for the whole machine
         self.background = "#ac7339"
 
-        #a list of all pairs in the plugboard
-        self.listOfPairs = []
-
         #gets the window
         self.master = master
 
+        try:
+            for widgets in self.master.winfo_children():
+                widgets.destroy()
+
+        except:
+            pass
+
         #makes the whole page full screen
-        self.master.geometry(str(master.winfo_screenwidth())+"x"+str(master.winfo_screenheight()))
+        self.master.geometry(str(master.winfo_screenwidth())+"x"+str(master.winfo_screenheight()) + "+0+0")
 
         self.master.update_idletasks()
 
@@ -49,6 +71,9 @@ class enigmaGUI:
         self.rotorDictionary = {'I': "JGDQOXUSCAMIFRVTPNEWKBLZYH","II": "NTZPSFBOKMWRCJDIVLAEYUXHGQ","III": "JVIUBHTCDYAKEQZPOSGXNRMWFL","IV": "ESOVPZJAYQUIRHXLNFTGKDCMWB","V": "VZBRGITYUPSDNHLXAWMJQOFECK","VI": "JPGVOUMFYQBENHZRDKASXLICTW",
             'UKW': 'QYHOGNECVPUZTFDJAXWMKISRBL', 'ETW': 'QWERTZUIOASDFGHJKPYXCVBNML', 'β': 'LEYJVCNIXWPBQMDRTAKZGFUHOS', 'Γ': 'FSOKANUERHMBTIYCWLQPZXVGJD'
         }
+
+        #a list of all pairs in the plugboard
+        self.listOfPairs = []
         
         self.mainPaige()
         
@@ -156,8 +181,10 @@ class enigmaGUI:
             widgets.destroy()
 
         #makes new frames
-        self.Canvas = Canvas(self.master, bd=0, highlightthickness=0, relief='ridge', bg = self.background, width = 500, height = 200)
-        self.Canvas.place(relx = 0.5, rely = 0.66, anchor = CENTER)
+        canvasWidth = 1500
+        canvasHeight = 500
+        self.Canvas = Canvas(self.master, bd=0, highlightthickness=0, relief='ridge', bg = self.background, width = canvasWidth, height = canvasHeight)
+        self.Canvas.place(relx = 0.5, rely = 0.5, anchor = CENTER)
 
         #creates the button to return to the main page
         self.returnButton = Button(self.master, text="^\n^\n^", command = self.mainPaige, bg = self.background)
@@ -165,82 +192,106 @@ class enigmaGUI:
 
         self.labelList = []
         self.dragPoint = []
+
         #create letters and drag spots/plugs
         count = 0
         for i in range(3):
 
-            for j in range(10 - (i ** 2)):
+            rowRange = 10 - i
+            if i == 2:
+                rowRange = 7
 
-                self.labelList.append(Label(self.Canvas, text = self.letters[count], bg = self.background, width = int(self.Canvas.winfo_width()/3), font = ("Ariel",16), padx=30,pady=5))
-                self.dragPoint.append(Label(self.Canvas,text="(•   •)", bg = "#a2683f", font = ("Ariel",16), padx=30,pady=5))
-                self.labelList[count].grid(row = 2 * i, column = j + i)
-                self.dragPoint[count].grid(row = 2 * i + 1, column = j + i)
-                #self.labelList[count].place(rely = 2 * i * 0.1, relx = (j + i) * 0.1)
-                #self.dragPoint[count].place(rely = (2 * i + 1)*0.1, relx = (j + i) * 0.1)
+            for j in range(rowRange):
+
+                self.labelList.append(Label(self.Canvas, text = self.letters[count], bg = self.background, width = int(self.Canvas.winfo_width()/3), font = ("Ariel",16)))
+                self.dragPoint.append(Label(self.Canvas,text="(  • {} •  )".format(self.letters[count]), bg = "#a2683f", font = ("Ariel",16), width=7))
+                xPos = (j + 0.5) * (canvasWidth / rowRange)
+                yPos = (2 * i) * canvasHeight/10 + 15
+                self.labelList[count].place(x = xPos, y = yPos, anchor = CENTER)
+                self.dragPoint[count].place(x = xPos, y = yPos + 50, anchor = CENTER)
                 self.dragPoint[count].bind("<Button-1>", lambda event, b = count: self.startDrag(event, b))
                 self.dragPoint[count].bind("<B1-Motion>", lambda event, b = count: self.doDrag(event, b))
                 self.dragPoint[count].bind("<ButtonRelease-1>", lambda event, b = count: self.endDrag(event, b))
+                
                 count += 1
-
-        #adds the z
-        self.labelList.append(Label(self.Canvas, text = self.letters[count], bg = self.background, width = int(self.Canvas.winfo_width()/3), font = ("Ariel",16), padx=30,pady=5))
-        self.dragPoint.append(Label(self.Canvas,text="(•   •)",bg = "#a2683f", font = ("Ariel",16), padx=30,pady=5))
-        self.labelList[25].grid(row = 4, column = 8)
-        self.dragPoint[25].grid(row = 5, column = 8)
-        self.dragPoint[25].bind("<Button-1>", lambda event, b = 25: self.startDrag(event, b))
-        self.dragPoint[25].bind("<B1-Motion>", lambda event, b = 25: self.doDrag(event, b))
-        self.dragPoint[25].bind("<ButtonRelease-1>", lambda event, b = 25: self.endDrag(event, b))
-
+        self.master.update()
         self.updatePairs()
 
-    def createLine(self, x1, y1, x2, y2):
-        """create the lines for the wires"""
-        self.lineList.append(self.Canvas.create_line(x1,y1,x2,y2, width=5))
-
     def startDrag(self, event, count):
-        """starts the drag event and animation with image and stuff"""
-        #creates the initial drag image
-        self.plugs = (Label(self.master, bg = "yellow", text = "PLUG"))
-        self.plugs.place(x = event.x_root, y = event.y_root - 54)
-        print(self.dragPoint[count].winfo_rootx() + (self.dragPoint[count].winfo_width() / 2), self.dragPoint[count].winfo_rooty() + (self.dragPoint[count].winfo_height() / 2), self.plugs.winfo_rootx() + (self.plugs.winfo_width() / 2), self.plugs.winfo_rooty() + (self.plugs.winfo_height() / 2))
-        self.createLine(self.dragPoint[count].winfo_rootx() + (self.dragPoint[count].winfo_width() / 2), self.dragPoint[count].winfo_rooty() + (self.dragPoint[count].winfo_height() / 2), self.plugs.winfo_rootx() + (self.plugs.winfo_width() / 2), self.plugs.winfo_rooty() + (self.plugs.winfo_height() / 2))
+        """Starts the drag event and animation with image and stuff"""
+        # Update the dragPoint label
+        self.dragPoint[count].config(text='PLUG')
+        
+        # Create drag label (PLUG) only if it doesn't exist
+        if not hasattr(self, 'plugs') or self.plugs is None:
+            self.plugs = Label(self.master, bg="yellow", text="PLUG")
+        
+        # Get local (widget) coordinates instead of screen coordinates
+        x = event.x_root - self.master.winfo_rootx()
+        y = event.y_root - self.master.winfo_rooty()
+        
+        self.plugs.place(x=x, y=y)
 
     def doDrag(self, event, count):
-        """what is being done in the drag event"""
-        #draws the plug where the mouse is
-        self.plugs.place(x = event.x_root, y = event.y_root - 54)
-        print(self.dragPoint[count].winfo_rootx() + (self.dragPoint[count].winfo_width() / 2), self.dragPoint[count].winfo_rooty() + (self.dragPoint[count].winfo_height() / 2), self.plugs.winfo_rootx() + (self.plugs.winfo_width() / 2), self.plugs.winfo_rooty() + (self.plugs.winfo_height() / 2))
-        self.Canvas.coords(self.lineList[-1], self.dragPoint[count].winfo_rootx() + (self.dragPoint[count].winfo_width() / 2), self.dragPoint[count].winfo_rooty() + (self.dragPoint[count].winfo_height() / 2), self.plugs.winfo_rootx() + (self.plugs.winfo_width() / 2), self.plugs.winfo_rooty() + (self.plugs.winfo_height() / 2))
+        """Handles the dragging"""
+        # Convert global coordinates to widget-local
+        x = event.x_root - self.master.winfo_rootx()
+        y = event.y_root - self.master.winfo_rooty()
+        
+        if hasattr(self, 'plugs') and self.plugs is not None:
+            self.plugs.place(x=x, y=y)
 
     def endDrag(self, event, count):
-        """ends the drag"""
-        #checks plug location if that is where it was dropped
-        plugPair = [count]
-        for i in range(26):
-            if self.plugs.winfo_rootx() >= self.dragPoint[i].winfo_rootx() and self.plugs.winfo_rootx() < self.dragPoint[i].winfo_rootx() + self.dragPoint[i].winfo_width():
-                if self.plugs.winfo_rooty() >= self.dragPoint[i].winfo_rooty() and self.plugs.winfo_rooty() < self.dragPoint[i].winfo_rooty() + self.dragPoint[i].winfo_height():
-                    plugPair.append(i)
+        """Ends the drag event"""
 
-        #destroys the plug
-        self.plugs.place_forget()
+        mouse_x = event.x_root
+        mouse_y = event.y_root
 
-        
-        #creates the new pair
-        if len(plugPair) == 2:
-            self.NewPair(plugPair)
+        target_index = None
 
+        for i, plug in enumerate(self.dragPoint):
+            # Skip if it's the one being dragged
+            if i == count:
+                continue
+
+            # Get absolute screen coordinates of the plug
+            plug_x1 = plug.winfo_rootx()
+            plug_y1 = plug.winfo_rooty()
+            plug_x2 = plug_x1 + plug.winfo_width()
+            plug_y2 = plug_y1 + plug.winfo_height()
+
+            # Check if mouse is within the plug's bounds
+            if plug_x1 <= mouse_x <= plug_x2 and plug_y1 <= mouse_y <= plug_y2:
+                target_index = i
+                break
+
+        if target_index is not None:
+            self.NewPair([self.letters[count], self.letters[target_index]])
+        else:
+            self.NewPair([self.letters[count], self.letters[count]])
+
+        # Remove the floating 'PLUG' label
+        if hasattr(self, 'plugs') and self.plugs is not None:
+            self.plugs.place_forget()
+            self.plugs = None
+            
     def NewPair(self, pairs):
         """creates a new pair of numbers in the plugboard"""
 
         #adds a new plug by getting what was in the menus
+        pairs[0] = ord(pairs[0]) - 65
+        pairs[1] = ord(pairs[1]) - 65
         self.machine.changePlug(pairs[0], pairs[1])
-        self.listOfPairs=self.machine.showPlugPairs()
+        self.listOfPairs=self.machine.plugBoard
         self.updatePairs()
 
     def updatePairs(self):
         """updates the plugboard page and adds in all the wires"""
+        print(self.listOfPairs)
         for i in self.listOfPairs:
-            self.createLine(self.dragPoint[i[0]].winfo_rootx(), self.dragPoint[i[0]].winfo_rooty(), self.dragPoint[i[1]].winfo_rootx(), self.dragPoint[i[1]].winfo_rooty())
+            print(i)
+            self.dragPoint[i[0]].config(text="(  • {} •  )".format(self.letters[i[1]]))
+        pairs=self.machine.showPlugPairs()
  
     def changeRotor(self,i,pair):
         """changes the given rotor to the given pair"""
@@ -255,6 +306,7 @@ class enigmaGUI:
     def onKeyPress(self,event):
         """when a key is pressed the encryption is started"""
         #checks if space is pressed
+        
         if event.char == " ":
             self.message.append("/")
 
