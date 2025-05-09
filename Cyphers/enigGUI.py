@@ -10,6 +10,8 @@ class enigmaGUI:
     def __init__(self, master: Tk):
         """initializes the class with back ground and sets up all atributes"""
 
+        self.released = True
+
         #the background colour for the whole machine
         self.background = "#ac7339"
 
@@ -264,34 +266,37 @@ class enigmaGUI:
         """when a key is pressed the encryption is started"""
         #checks if space is pressed
 
-        if self.rowlen >= 75:
-            self.message.append("\n")
-            self.rowlen = 0
-        
-        if event.char == " ":
-            self.message.append("/")
-
-        if ord(event.char) == 13:
-            self.rowlen = -1
-            self.message.append(event.char)
-
-        #checks if any key that isnt a letter is typed
-        elif ord(event.char.upper()) - 65 < 0 or ord(event.char.upper()) - 65 > 25:
-            self.message.append(event.char)
-
-        #gets the letter and shows it on the message
-        else:
-            letter = self.machine.getLetter(ord(event.char.upper()) - 65)
-            self.keyboard[letter].config(bg = 'yellow')
-            for i in range(3):
-                self.ButtonReg[i].config(text = self.getRotLet(i))
-            self.message.append(chr(letter + 65))
+        if self.released:
+            self.released = False
+            if self.rowlen >= 75:
+                self.message.append("\n")
+                self.rowlen = 0
             
-        self.rowlen += 1
-        self.messageLabel.config(text="".join(self.message))
+            if event.char == " ":
+                self.message.append("/")
+
+            if ord(event.char) == 13:
+                self.rowlen = -1
+                self.message.append(event.char)
+
+            #checks if any key that isnt a letter is typed
+            elif ord(event.char.upper()) - 65 < 0 or ord(event.char.upper()) - 65 > 25:
+                self.message.append(event.char)
+
+            #gets the letter and shows it on the message
+            else:
+                letter = self.machine.getLetter(ord(event.char.upper()) - 65)
+                self.keyboard[letter].config(bg = 'yellow')
+                for i in range(3):
+                    self.ButtonReg[i].config(text = self.getRotLet(i))
+                self.message.append(chr(letter + 65))
+                
+            self.rowlen += 1
+            self.messageLabel.config(text="".join(self.message))
   
     def onRelease(self,event):
         """catches the released key to simulate a light turning on when the key is held"""
+        self.released = True
         for i in self.keyboard:
             i.config(bg = '#593715')
 
