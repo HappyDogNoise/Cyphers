@@ -1,6 +1,7 @@
 
 from tkinter import *
 from Cyphers import Enigma
+import pyperclip
 
 class Plugs:
 
@@ -28,6 +29,9 @@ class enigmaGUI:
 
         #the background colour for the whole machine
         self.background = "#ac7339"
+
+        self.message = []
+        self.rowlen = 0
 
         #gets the window
         self.master = master
@@ -75,52 +79,26 @@ class enigmaGUI:
         #a list of all pairs in the plugboard
         self.listOfPairs = []
         
-        self.mainPaige()
+        self.mainPage()
         
         master.mainloop()
 
     def resize(self, a):
         """resizes all attributes according to the window size"""
-        print("test", a)
-        #self.changeFrameSizes()
-
-    def changeFrameSizes(self):
-        """changes the size of the frames"""
-        self.master.update_idletasks()
-        for i in self.FramePack:
-            i.config(width=self.master.winfo_width()/3, height=self.master.winfo_height()/2)
+        pass
 
     def clearMessage(self):
         """clears the message screen"""
         self.message = []
+        self.rowlen = 0
         self.messageLabel.config(text=self.message)
 
-    def mainPaige(self):
+    def mainPage(self):
         """creates the main paige"""
 
         #clears the screen
         for widgets in self.master.winfo_children():
             widgets.destroy()
-
-        #creates a list of all the frames
-        self.FramePack = [Frame(self.master, bg = self.background),
-                          Frame(self.master, bg = self.background),
-                          Frame(self.master, bg = self.background),
-                          Frame(self.master, bg = self.background),
-                          Frame(self.master, bg = self.background),
-                          Frame(self.master, bg = self.background),
-                          Frame(self.master, bg = self.background),
-                          Frame(self.master, bg = self.background),
-                          Frame(self.master, bg = self.background),
-                          ]
-        self.changeFrameSizes()
-
-        #places each frame in the correct position of a grid
-        for i in range(3):
-            
-            for f in range(3):
-                 
-                 self.FramePack[(3*i)+f].grid(column = f, row = i)
 
         #initiallizes the list for the keyboard
         self.keyboard = []
@@ -135,37 +113,36 @@ class enigmaGUI:
         self.ButtonReg = []
         self.stringVarRegi = []
         self.rotorReg = []
+        yRel = 0.1
         for i in range(3):
-            self.ButtonReg.append(Button(self.FramePack[2-i], text = self.getRotLet(i), command = lambda i = i:self.pushOne(i), height = 3, width = 5,bg = self.background))
-            self.ButtonReg[i].grid(row = 0, column = 2 - i)
+            xREL = 1 - ((i * 0.25) + 0.25)
+            self.ButtonReg.append(Button(self.master, text = self.getRotLet(i), command = lambda i = i:self.pushOne(i), height = 3, width = 5,bg = self.background))
+            self.ButtonReg[i].place(rely = yRel, relx = xREL, anchor = CENTER)
 
             self.stringVarRegi.append(StringVar())
             self.stringVarRegi[i].set(self.vList[i])
 
-            self.rotorReg.append(OptionMenu(self.FramePack[2 - i], self.stringVarRegi[i], *self.vList,command = lambda a, i = i:self.selectPair(i,a)))
-            self.rotorReg[i].grid(row = 1, column = 2 - i)
+            self.rotorReg.append(OptionMenu(self.master, self.stringVarRegi[i], *self.vList,command = lambda a, i = i:self.selectPair(i,a)))
+            self.rotorReg[i].place(rely = yRel + 0.05, relx = xREL, anchor = CENTER)
 
         #updates the interrupt register
         self.master.update_idletasks()
 
-        #sets the sizes of the rows and columns
-        self.master.grid_rowconfigure(0, minsize=250, weight=1)
-        self.master.grid_rowconfigure(1, minsize=250, weight=1)
-        self.master.grid_rowconfigure(2, minsize=250, weight=1)
-        self.master.grid_columnconfigure(0, minsize=450, weight=1)
-        self.master.grid_columnconfigure(1, minsize=450, weight=1)
-        self.master.grid_columnconfigure(2, minsize=450, weight=1)
-
         #shows the typed message
-        self.messageLabel = Label(self.FramePack[8], bg=self.background)
-        self.messageLabel.grid(row=0,column=0)
-        self.message = []
-        self.clrMessage = Button(self.FramePack[6],bg = self.background,text="clear message",command=self.clearMessage)
-        self.clrMessage.grid(row=0,column=0)#initiallizes the list for the keyboard
+        self.messageLabel = Label(self.master, bg=self.background, text="".join(self.message))
+        self.messageLabel.place(rely=0.8, relx=0.7, anchor=N)
+        self.clrMessage = Button(self.master,bg = self.background,text="clear message",command=self.clearMessage)
+        self.clrMessage.place(rely=0.8, relx=0.25, anchor=CENTER)#initiallizes the list for the keyboard
+        self.copyBtn = Button(self.master, bg=self.background,text = "COPY\nMSG", command=self.copyMessage)
+        self.copyBtn.place(rely = 0.8, relx = 0.9, anchor=CENTER)
 
         #shows the plugboard
-        self.plugboard = Button(self.FramePack[7],bg=self.background,text="v\nv\nv",command=self.setupPlugBoard)
-        self.plugboard.grid(row=0,column=0)
+        self.plugboard = Button(self.master,bg=self.background,text="v\nv\nv",command=self.setupPlugBoard)
+        self.plugboard.place(rely=1-yRel, relx=0.5, anchor=CENTER)
+
+    def copyMessage(self):
+        """Copy the message to clipboard"""
+        pyperclip.copy("".join(self.message))
 
     def pushEm(self):
         """Cycles the primary rotor"""
@@ -180,14 +157,13 @@ class enigmaGUI:
         for widgets in self.master.winfo_children():
             widgets.destroy()
 
-        #makes new frames
         canvasWidth = 1500
         canvasHeight = 500
         self.Canvas = Canvas(self.master, bd=0, highlightthickness=0, relief='ridge', bg = self.background, width = canvasWidth, height = canvasHeight)
         self.Canvas.place(relx = 0.5, rely = 0.5, anchor = CENTER)
 
         #creates the button to return to the main page
-        self.returnButton = Button(self.master, text="^\n^\n^", command = self.mainPaige, bg = self.background)
+        self.returnButton = Button(self.master, text="^\n^\n^", command = self.mainPage, bg = self.background)
         self.returnButton.place(relx = 0.5, rely=0.05, anchor = CENTER)
 
         self.labelList = []
@@ -287,9 +263,7 @@ class enigmaGUI:
 
     def updatePairs(self):
         """updates the plugboard page and adds in all the wires"""
-        print(self.listOfPairs)
         for i in self.listOfPairs:
-            print(i)
             self.dragPoint[i[0]].config(text="(  • {} •  )".format(self.letters[i[1]]))
         pairs=self.machine.showPlugPairs()
  
@@ -306,9 +280,17 @@ class enigmaGUI:
     def onKeyPress(self,event):
         """when a key is pressed the encryption is started"""
         #checks if space is pressed
+
+        if self.rowlen >= 75:
+            self.message.append("\n")
+            self.rowlen = 0
         
         if event.char == " ":
             self.message.append("/")
+
+        if ord(event.char) == 13:
+            self.rowlen = -1
+            self.message.append(event.char)
 
         #checks if any key that isnt a letter is typed
         elif ord(event.char.upper()) - 65 < 0 or ord(event.char.upper()) - 65 > 25:
@@ -321,12 +303,14 @@ class enigmaGUI:
             for i in range(3):
                 self.ButtonReg[i].config(text = self.getRotLet(i))
             self.message.append(chr(letter + 65))
-        self.messageLabel.config(text=self.message)
+            
+        self.rowlen += 1
+        self.messageLabel.config(text="".join(self.message))
   
     def onRelease(self,event):
         """catches the released key to simulate a light turning on when the key is held"""
         for i in self.keyboard:
-            i.config(bg = self.background)
+            i.config(bg = '#593715')
 
     def pushOne(self,i):
         """pushes the rotor and shows it on the screen"""
@@ -341,19 +325,27 @@ class enigmaGUI:
     def setKeyboard(self):
         """sets up the Lightboard"""
 
+        canvasWidth = 1500
+        canvasHeight = 500
+        self.Canvas = Canvas(self.master, bd=0, highlightthickness=0, relief='ridge', bg = '#593715', width = canvasWidth, height = canvasHeight)
+        self.Canvas.place(relx = 0.5, rely = 0.5, anchor = CENTER)
+
         #loops 3 lines
         count = 0
         for i in range(3):
             
-            #creates each letter
-            for f in range(10 - (i ** 2)):
+            rowRange = 10 - i
+            if i == 2:
+                rowRange = 7
+
+            for j in range(rowRange):
+                xPos = (j + 0.5) * (canvasWidth / rowRange)
+                yPos = (i + 0.5) * canvasHeight/3
                 
                 #creates the letters
-                self.keyboard.append(Label(self.FramePack[4], text = self.letters[count],bg = self.background, font = ("Ariel",16), padx=10,pady=5))
-                self.keyboard[count].grid(row = i, column = f+i)
+                self.keyboard.append(Label(self.Canvas, text = self.letters[count],bg = '#593715', font = ("Ariel",16), padx=10,pady=5))
+                self.keyboard[count].place(x = xPos, y = yPos, anchor=CENTER)
                 count += 1
-        self.keyboard.append(Label(self.FramePack[4],text = "Z",bg = self.background, font = ("Ariel",16), padx=10,pady=5))
-        self.keyboard[25].grid(row = 2, column = 8)
 
 if __name__ == "__main__":
     root = Tk()
