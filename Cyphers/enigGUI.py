@@ -3,23 +3,6 @@ from tkinter import *
 from Cyphers import Enigma
 import pyperclip
 
-class Plugs:
-
-    def __init__(self, xPos, yPos, letter):
-        """creates the plug classes and assignes their limits"""
-
-        #size of the plugs with [x, y]
-        self.plugSize = [10, 5]
-
-        #top left position of each plug
-        self.Positions = [xPos, yPos]
-
-        #bottom right pos
-        self.limits = [self.Positions[0] + self.plugSize[0], self.Positions[1] + self.plugSize[1]]
-
-        self.letter = letter
-
-
 
 class enigmaGUI:
     """Tkinter class for the GUI"""
