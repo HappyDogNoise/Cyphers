@@ -417,7 +417,8 @@ if __name__ == "__main__":
         pass
     print(getcwd())
     f = open("MessageTest.txt","w")
-    f.write(""".--./.--/-.-./..-/.-/.--./ /.--/.--./ /-.../---/-.../..-/.--
+    #Put Morse Code message in here
+    f.write("""
 """)
     f.close()
     f = open("MessageTest.txt","a")
